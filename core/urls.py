@@ -13,7 +13,8 @@ except:
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("", include("admin_berry.urls")),
+    path("", include("home.urls")),
+    path("berry/", include("admin_berry.urls")),
 ]
 
 
