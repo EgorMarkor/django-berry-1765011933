@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DoorPoint CRM • Отчётность</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --panel: #111827;
+            --card: #1f2937;
+            --accent: #8b5cf6;
+            --accent-2: #06b6d4;
+            --text: #e5e7eb;
+            --muted: #9ca3af;
+            --border: #1f2937;
+            --success: #22c55e;
+            --warn: #f59e0b;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: radial-gradient(circle at 10% 20%, rgba(107,70,193,0.12), transparent 25%),
+                        radial-gradient(circle at 90% 20%, rgba(6,182,212,0.12), transparent 25%),
+                        var(--bg);
+            color: var(--text);
+        }
+        a { color: var(--accent-2); }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 20px 64px;
+        }
+        header {
+            display: grid;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(139,92,246,0.12);
+            border: 1px solid rgba(139,92,246,0.3);
+            color: #c4b5fd;
+            width: fit-content;
+            font-size: 13px;
+        }
+        h1 { margin: 0; font-size: 32px; letter-spacing: -0.5px; }
+        p.lead { margin: 0; color: var(--muted); max-width: 820px; }
+        .grid {
+            display: grid;
+            gap: 16px;
+        }
+        .grid-cols-3 { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+        .grid-cols-2 { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+        .card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.02), rgba(255,255,255,0.0));
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+        }
+        .card h3 { margin: 0 0 10px; font-size: 18px; }
+        .card .muted { color: var(--muted); font-size: 14px; margin-bottom: 8px; }
+        .pill {
+            padding: 6px 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.06);
+            background: rgba(255,255,255,0.02);
+            color: var(--muted);
+            font-size: 13px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        table th, table td {
+            padding: 10px 8px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            font-size: 14px;
+        }
+        table th { color: var(--muted); font-weight: 600; }
+        .stat {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .label { color: var(--muted); font-size: 13px; }
+        .row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .tag {
+            padding: 4px 8px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+            font-size: 13px;
+            color: #cbd5f5;
+        }
+        section { margin: 36px 0 8px; }
+        section h2 { margin: 0 0 6px; letter-spacing: -0.3px; }
+        section .muted { margin: 0 0 12px; }
+        .stack { display: grid; gap: 10px; }
+        .positive { color: var(--success); }
+        .warning { color: var(--warn); }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <div class="badge">Berry → DoorPoint CRM</div>
+        <h1>Отчётность для дверной точки</h1>
+        <p class="lead">Единый экран, который перекрывает требования к масштабированию, контролю менеджеров и производственных рисков. Все блоки ниже — готовое ТЗ для разработчиков CRM.</p>
+    </header>
+
+    <div class="grid grid-cols-3">
+        <div class="card">
+            <div class="label">Операционная прибыль</div>
+            <div class="stat">{{ totals.operating_profit|floatformat:0 }} ₽</div>
+            <div class="muted">Продажи {{ totals.sales|floatformat:0 }} ₽ · Затраты {{ totals.expenses|floatformat:0 }} ₽</div>
+        </div>
+        <div class="card">
+            <div class="label">Доступные средства</div>
+            <div class="stat">{{ totals.cash_balance|floatformat:0 }} ₽</div>
+            <div class="muted">Налог к уплате: {{ totals.taxes|floatformat:0 }} ₽</div>
+        </div>
+        <div class="card">
+            <div class="label">Чистая прибыль</div>
+            <div class="stat">{{ totals.net_profit|floatformat:0 }} ₽</div>
+            <div class="muted">Маржинальность по текущему периоду</div>
+        </div>
+    </div>
+
+    <section id="leads">
+        <h2>1. Лиды и каналы</h2>
+        <p class="muted">Контроль QR-стендов, таргета и общий лидогенерационный срез.</p>
+        <div class="grid grid-cols-2">
+            <div class="card">
+                <h3>QR стенды</h3>
+                <div class="muted">Адрес → Лиды → Заказы</div>
+                <table>
+                    <thead><tr><th>Адрес</th><th>Лиды</th><th>Заказы</th></tr></thead>
+                    <tbody>
+                        {% for stand in qr_stands %}
+                        <tr>
+                            <td>{{ stand.address }}</td>
+                            <td>{{ stand.leads }}</td>
+                            <td>{{ stand.orders }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Таргетинг</h3>
+                <div class="muted">Затраты, конверсии, прогноз при +20% бюджета.</div>
+                <table>
+                    <thead>
+                        <tr><th>Источник</th><th>Лиды</th><th>Конверсия в заказ</th><th>Потрачено</th><th>+20% бюджета</th><th>Прогноз заказов</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for channel in targeting_channels %}
+                        <tr>
+                            <td>{{ channel.name }}</td>
+                            <td>{{ channel.leads }}</td>
+                            <td>{{ channel.conversion }}%</td>
+                            <td>{{ channel.spent }} ₽</td>
+                            <td>{{ channel.projected_spend }} ₽</td>
+                            <td>{{ channel.forecast_orders }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section id="managers">
+        <h2>2. Контроль менеджеров</h2>
+        <p class="muted">Скорость реакции, выполнение регламентов и качество коммуникаций.</p>
+        <div class="grid grid-cols-3">
+            <div class="card">
+                <h3>Скорость реакции</h3>
+                <div class="stack">
+                    <div><span class="label">Первый ответ</span><div class="stat">{{ manager_responsiveness.first_reply }}</div></div>
+                    <div><span class="label">Среднее время</span><div class="stat">{{ manager_responsiveness.avg_reply }}</div></div>
+                    <div class="muted">Потеряно лидов: {{ manager_responsiveness.lost_leads }} · {{ manager_responsiveness.callback_stats }}</div>
+                    <div class="positive">{{ manager_responsiveness.quality_score }}</div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Регламенты CRM</h3>
+                <div class="stack">
+                    <div class="muted">Задачи выполнены: {{ crm_compliance.tasks_completed }}%</div>
+                    <div class="warning">Просрочено: {{ crm_compliance.tasks_overdue }}%</div>
+                    <div class="muted">Лиды >24ч без движения: {{ crm_compliance.stuck_leads }}</div>
+                    <div class="row">
+                        {% for name in crm_compliance.heavy_users %}
+                        <div class="tag">Заваливает сделки: {{ name }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <h3>Эффективность</h3>
+                <table>
+                    <thead><tr><th>Менеджер</th><th>Взято</th><th>Обработано</th><th>Замер</th><th>Заказ</th><th>Чек</th><th>Маржа</th><th>AI</th></tr></thead>
+                    <tbody>
+                        {% for manager in manager_effectiveness %}
+                        <tr>
+                            <td>{{ manager.name }}</td>
+                            <td>{{ manager.picked }}</td>
+                            <td>{{ manager.processed }}</td>
+                            <td>{{ manager.measure_conversion }}%</td>
+                            <td>{{ manager.order_conversion }}%</td>
+                            <td>{{ manager.avg_check }} ₽</td>
+                            <td>{{ manager.avg_margin|floatformat:2 }}</td>
+                            <td>{{ manager.rating }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <section id="site">
+        <h2>3. Сайт и AI</h2>
+        <p class="muted">Воронка, конструктор дверей и техническое здоровье.</p>
+        <div class="grid grid-cols-2">
+            <div class="card">
+                <h3>Воронка сайта</h3>
+                <div class="muted">Модель → цвет → регион</div>
+                <table>
+                    <thead><tr><th>Модель</th><th>Цвет</th><th>Регион</th><th>Глубина</th><th>Клики</th></tr></thead>
+                    <tbody>
+                        {% for item in site_funnel.by_model %}
+                        <tr>
+                            <td>{{ item.model }}</td>
+                            <td>{{ item.color }}</td>
+                            <td>{{ item.region }}</td>
+                            <td>{{ item.depth }}</td>
+                            <td>{{ item.clicks }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="row">
+                    {% for item in site_funnel.by_device %}
+                        <div class="tag">{{ item.device }}: {{ item.sessions }} сессий / {{ item.orders }} заказов</div>
+                    {% endfor %}
+                </div>
+                <div class="row" style="margin-top:8px;">
+                    {% for item in site_funnel.by_age %}
+                        <div class="tag">{{ item.age }}: {{ item.sessions }} / {{ item.orders }}</div>
+                    {% endfor %}
+                </div>
+                <div class="row" style="margin-top:8px;">
+                    {% for item in site_funnel.utm %}
+                        <div class="tag">UTM {{ item.source }}: {{ item.sessions }} / {{ item.orders }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="card">
+                <h3>Конструктор дверей</h3>
+                <div class="row">
+                    <div class="tag">% до визуализации: {{ builder_report.visualization }}%</div>
+                    <div class="tag">Изменили цвет: {{ builder_report.color_changed }}%</div>
+                    <div class="tag">Изменили модель: {{ builder_report.model_changed }}%</div>
+                    <div class="tag">Добавили опции: {{ builder_report.options_added }}%</div>
+                    <div class="tag">2+ вариации: {{ builder_report.multi_variations }}%</div>
+                </div>
+                <div class="muted" style="margin-top:12px;">Топ 10 собираемых конфигураций</div>
+                <div class="row">
+                    {% for item in builder_report.top_built %}<div class="tag">{{ item }}</div>{% endfor %}
+                </div>
+                <div class="muted" style="margin-top:12px;">Топ 10 брошенных</div>
+                <div class="row">
+                    {% for item in builder_report.abandoned %}<div class="tag">{{ item }}</div>{% endfor %}
+                </div>
+                <div class="muted" style="margin-top:12px;">Скорость и UX</div>
+                <div class="row">
+                    <div class="tag">Загрузка: {{ site_health.load_speed }}</div>
+                    <div class="tag">404: {{ site_health.not_found }}</div>
+                    <div class="tag">Ошибки: {{ site_health.console_errors }}</div>
+                </div>
+                <div class="muted" style="margin-top:8px;">Проблемные точки: {{ site_health.bounce_points|join:', ' }} · {{ site_health.ux_notes }}</div>
+            </div>
+        </div>
+    </section>
+
+    <section id="production">
+        <h2>4. 1С и производство</h2>
+        <p class="muted">Статусы заказов, ошибки номенклатуры и рекламации.</p>
+        <div class="grid grid-cols-3">
+            <div class="card">
+                <h3>Разночтения 1С / CRM</h3>
+                <table>
+                    <thead><tr><th>Ошибки</th><th>Количество</th></tr></thead>
+                    <tbody>
+                        {% for row in inventory_checks %}
+                        <tr><td>{{ row.title }}</td><td>{{ row.count }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Контроль производства</h3>
+                <table>
+                    <thead><tr><th>Событие</th><th>Кол-во</th></tr></thead>
+                    <tbody>
+                        {% for row in production_control %}
+                        <tr><td>{{ row.title }}</td><td>{{ row.count }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h3>Рекламации</h3>
+                <div class="muted">Тип, причина, сумма потерь</div>
+                <table>
+                    <thead><tr><th>Тип</th><th>Причина</th><th>Потери</th><th>Закрытие</th></tr></thead>
+                    <tbody>
+                        {% for claim in claims.types %}
+                        <tr>
+                            <td>{{ claim.type }}</td>
+                            <td>{{ claim.reason }}</td>
+                            <td>{{ claim.loss }} ₽</td>
+                            <td>{{ claim.close_time }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="muted" style="margin-top:10px;">Проценты брака по моделям</div>
+                <div class="row">
+                    {% for defect in claims.defect_share %}
+                        <div class="tag">{{ defect.model }} — {{ defect.rate }}%</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="sales">
+        <h2>5. Продажи и воронки</h2>
+        <p class="muted">Объём в штуках и рублях по регионам, стендам и каналам.</p>
+        <div class="grid grid-cols-2">
+            <div class="card">
+                <h3>Полная воронка</h3>
+                <table>
+                    <thead><tr><th>Этап</th><th>Шт</th><th>₽</th></tr></thead>
+                    <tbody>
+                        {% for stage in sales_funnel %}
+                        <tr>
+                            <td>{{ stage.stage }}</td>
+                            <td>{{ stage.units }}</td>
+                            <td>{{ stage.value|floatformat:0 }} ₽</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h3>ABC / XYZ</h3>
+                <table>
+                    <thead><tr><th>Группа</th><th>Доля оборота</th><th>Стабильность</th></tr></thead>
+                    <tbody>
+                        {% for item in abc_xyz %}
+                        <tr><td>{{ item.group }}</td><td>{{ item.share }}%</td><td>{{ item.stability }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="muted" style="margin-top:8px;">Средний чек</div>
+                {% for section in average_ticket %}
+                    <div class="row" style="margin-bottom:6px;">
+                        <div class="tag">{{ section.dimension }}</div>
+                        {% for item in section.items %}
+                            <div class="tag">{{ item.label }}: {{ item.value }} ₽</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="card" style="margin-top:16px;">
+            <h3>LTV и прогноз продаж</h3>
+            <div class="row">
+                {% for item in ltv %}
+                    <div class="tag">{{ item.label }}: {{ item.value }} ₽</div>
+                {% endfor %}
+            </div>
+            <div class="row" style="margin-top:8px;">
+                {% for item in forecast %}
+                    <div class="tag">{{ item.period }}: {{ item.projection }} заказов</div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+
+    <section id="marketing">
+        <h2>6. Маркетинг</h2>
+        <p class="muted">Горячие/холодные лиды, качество трафика и экономика каналов.</p>
+        <div class="grid grid-cols-3">
+            <div class="card">
+                <h3>Температура лидов</h3>
+                <div class="stack">
+                    {% for item in lead_quality %}
+                        <div class="row">
+                            <div class="tag">{{ item.label }} — {{ item.share }}%</div>
+                            <div class="muted">{{ item.criteria }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="card">
+                <h3>Качество трафика</h3>
+                <div class="stack">
+                    {% for item in traffic_quality %}
+                        <div class="row"><div class="tag">{{ item.metric }}</div><div class="muted">{{ item.value }}</div></div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="card">
+                <h3>Математика каналов</h3>
+                <div class="stack">
+                    {% for item in target_math %}
+                        <div class="row"><div class="tag">{{ item.metric }}</div><div class="muted">{{ item.value }}</div></div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="catalog">
+        <h2>7. Аналитика номенклатуры</h2>
+        <p class="muted">По модели, цвету и городу для SEO и закупок.</p>
+        <div class="grid grid-cols-2">
+            {% for city, models in product_analytics.items %}
+            <div class="card">
+                <h3>{{ city }}</h3>
+                {% if models %}
+                    {% for model in models %}
+                        <div class="muted">Модель {{ model.model }}</div>
+                        {% if model.colors %}
+                            <table>
+                                <thead><tr><th>Цвет</th><th>% продаж</th><th>% цветов</th><th>% модели</th><th>₽</th><th>Шт</th></tr></thead>
+                                <tbody>
+                                {% for color in model.colors %}
+                                    <tr>
+                                        <td>{{ color.color }}</td>
+                                        <td>{{ color.share_sales }}%</td>
+                                        <td>{{ color.share_colors }}%</td>
+                                        <td>{{ color.share_models }}%</td>
+                                        <td>{{ color.rub }}</td>
+                                        <td>{{ color.qty }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <div class="muted">Нет продаж по цветам</div>
+                        {% endif %}
+                    {% endfor %}
+                {% else %}
+                    <div class="muted">Пока нет данных по продажам</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section id="finance">
+        <h2>8. Финансы</h2>
+        <p class="muted">Платёжный календарь, ДДС и P&L.</p>
+        <div class="grid grid-cols-3">
+            <div class="card">
+                <h3>Платёжный календарь</h3>
+                <table>
+                    <thead><tr><th>Статья</th><th>Сумма</th><th>Срок</th></tr></thead>
+                    <tbody>
+                        {% for item in payment_calendar %}
+                        <tr><td>{{ item.title }}</td><td>{{ item.amount }} ₽</td><td>{{ item.date }}</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h3>ДДС</h3>
+                <table>
+                    <thead><tr><th>Период</th><th>Приход</th><th>Расход</th></tr></thead>
+                    <tbody>
+                        {% for flow in cash_flow %}
+                        <tr><td>{{ flow.period }}</td><td>{{ flow.inflow }} ₽</td><td>{{ flow.outflow }} ₽</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card">
+                <h3>P&amp;L</h3>
+                <div class="stack">
+                    <div class="row"><div class="tag">Валовая прибыль</div><div class="stat">{{ profit_loss.gross|floatformat:0 }} ₽</div></div>
+                    <div class="row"><div class="tag">Операционная</div><div class="stat">{{ profit_loss.operating|floatformat:0 }} ₽</div></div>
+                    <div class="row"><div class="tag">EBITDA</div><div class="stat">{{ profit_loss.ebitda|floatformat:0 }} ₽</div></div>
+                    <div class="row"><div class="tag">Чистая</div><div class="stat">{{ profit_loss.net|floatformat:0 }} ₽</div></div>
+                </div>
+            </div>
+        </div>
+        <div class="card" style="margin-top:16px;">
+            <h3>Маржинальность по измерениям</h3>
+            <div class="grid grid-cols-3">
+                {% for block in margin_breakdown %}
+                    <div>
+                        <div class="muted">{{ block.dimension }}</div>
+                        <div class="stack">
+                            {% for item in block.items %}
+                                <div class="row"><div class="tag">{{ item.label }}</div><div class="muted">{{ item.margin }}</div></div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card" style="margin-top:16px;">
+            <h3>Затраты (детализация)</h3>
+            <table>
+                <thead><tr><th>Статья</th><th>Сумма</th></tr></thead>
+                <tbody>
+                    {% for line in expense_lines %}
+                    <tr>
+                        <td>{{ line.name }}</td>
+                        <td>{% if line.amount %}{{ line.amount }} ₽{% else %}—{% endif %}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+</body>
+</html>
